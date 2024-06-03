@@ -1,0 +1,8 @@
+[Unit]
+Description=Automatically connects to specified bluetooth device (MAC address)
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/Boat-Airplay/bluetooth_connector.py
+
+[Install]
+WantedBy=multi-user.target
