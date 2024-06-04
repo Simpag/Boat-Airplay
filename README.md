@@ -8,7 +8,7 @@ Run this on startup.
 Set the mac address at the top of `bluetooth_connector.py`.
 
 # Auto-run
-Copy `bluetooth_connector.service` to `/etc/systemd/system/` or create a symlink: `ln -s bluetooth_connector.service /etc/systemd/system/`.
+Copy `bluetooth_connector.service` to `/etc/systemd/system/`.
 
 To enable the service, run the following: 
 
