@@ -12,12 +12,12 @@ Update raspi
 # rpi-update
 ```
 
-Expand to full disk size, turn on auto login and update
+Expand to full disk size, turn on auto login, set wlan country and update using:
 ```
 # raspi-config
 ```
 
-Install build toold
+Install build tools
 
 ```
 # apt install --no-install-recommends build-essential git xmltoman autoconf automake libtool libpopt-dev libconfig-dev libasound2-dev avahi-daemon libavahi-client-dev libssl-dev libsoxr-dev libplist-dev libsodium-dev libavutil-dev libavcodec-dev libavformat-dev uuid-dev libgcrypt-dev xxd
@@ -28,7 +28,7 @@ Install kernel headers
 # apt install raspberrypi-kernel-headers
 ```
 
-Clone [drivers](https://github.com/aircrack-ng/rtl8188eus?tab=readme-ov-file) and install
+Clone [drivers](https://github.com/aircrack-ng/rtl8188eus?tab=readme-ov-file) and install according to github instructions
 ```
 git clone https://github.com/aircrack-ng/rtl8188eus.git
 ```
@@ -40,7 +40,46 @@ dtoverlay=pi3-disable-wifi
 
 Follow [shairport-sync tutorial](https://github.com/mikebrady/shairport-sync/blob/master/CAR%20INSTALL.md) to install shairport-sync airplay 2 and wifi hotspot
 
-Make rc.local executable by adding ``# chmod +x /etc/rc.local``
+Make rc.local executable by adding ``# chmod +x /etc/rc.local``:
+
+Example hostapd config 
+```
+# Thanks to https://wiki.gentoo.org/wiki/Hostapd#802.11b.2Fg.2Fn_triple_AP
+
+# The interface used by the AP
+interface=wlan0
+
+# This is the name of the network -- yours may be different
+ssid=Ohana
+
+# 1=wpa, 2=wep, 3=both
+auth_algs=1
+
+# WPA2 only
+wpa=2
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+wpa_passphrase=somepassword
+
+# "g" simply means 2.4GHz band
+hw_mode=g
+
+# Channel to use
+channel=11
+
+# Limit the frequencies used to those allowed in the country
+ieee80211d=1
+
+# The country code
+country_code=SE
+
+# Enable 802.11n support
+ieee80211n=1
+
+# QoS support, also required for full speed on 802.11n/ac/ax
+wmm_enabled=1
+
+```
 
 ## Bluetooth audio
 ```
