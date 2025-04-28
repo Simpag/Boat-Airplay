@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth Manager</title>
+    <script>
+        function scanDevices() {
+            fetch('/scan')
+                .then(response => response.json())
+                .then(devices => {
+                    let devicesList = document.getElementById('devices-list');
+                    devicesList.innerHTML = '';
+                    devices.forEach(device => {
+                        let li = document.createElement('li');
+                        li.textContent = `${device.name} (${device.address})`;
+                        let pairButton = document.createElement('button');
+                        pairButton.textContent = 'Pair & Trust';
+                        pairButton.onclick = () => pairDevice(device.address);
+                        li.appendChild(pairButton);
+                        devicesList.appendChild(li);
+                    });
+                });
+        }
+
+        function pairDevice(deviceAddress) {
+            fetch(`/pair/${deviceAddress}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert('Device paired and trusted!');
+                    } else {
+                        alert('Failed to pair device.');
+                    }
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Bluetooth Manager</h1>
+    <button onclick="scanDevices()">Scan for Devices</button>
+    <ul id="devices-list"></ul>
+</body>
+</html>
