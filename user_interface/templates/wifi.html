@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Device Manager</title>
+    <title>WiFi Setup</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,38 +22,57 @@
             color: #333;
         }
 
-        .button-container {
+        form {
             display: flex;
             flex-direction: column;
             gap: 1em;
-            align-items: center;
+            width: 90%;
+            max-width: 400px;
         }
 
-        a button {
-            padding: 1em 2em;
-            font-size: 1.2em;
+        input[type="text"],
+        input[type="password"] {
+            padding: 0.8em;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 1em;
+            font-size: 1.1em;
             background-color: #4CAF50;
             border: none;
             color: white;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
-            min-width: 200px;
         }
 
-        a button:hover {
+        button:hover {
             background-color: #45a049;
             transform: scale(1.05);
+        }
+
+        .back-button {
+            margin-top: 2em;
+            background-color: #555;
+        }
+
+        .back-button:hover {
+            background-color: #333;
         }
     </style>
 </head>
 
 <body>
-    <h1>Device Manager</h1>
-    <div class="button-container">
-        <a href="/wifi"><button>Manage WiFi</button></a>
-        <a href="/bluetooth"><button>Manage Bluetooth</button></a>
-    </div>
+    <h1>WiFi Setup</h1>
+    <form method="POST">
+        <input type="text" name="ssid" placeholder="WiFi SSID" required>
+        <input type="password" name="password" placeholder="WiFi Password" required>
+        <button type="submit">Connect</button>
+    </form>
+    <a href="/"><button class="back-button">Back</button></a>
 </body>
 
 </html>

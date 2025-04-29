@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 2em;
+            background: #f5f7fa;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 2em;
+            color: #333;
+        }
+
+        button {
+            padding: 1em 2em;
+            font-size: 1.1em;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 1em 0;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        li {
+            background: white;
+            margin: 0.5em 0;
+            padding: 1em;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li button {
+            background-color: #2196F3;
+        }
+
+        li button:hover {
+            background-color: #1976D2;
+        }
+
+        .back-button {
+            background-color: #555;
+            margin-top: 2em;
+        }
+
+        .back-button:hover {
+            background-color: #333;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            margin-top: 2em;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+            /* Hidden by default */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script>
+        function scanDevices() {
+            let spinner = document.getElementById('loading-spinner');
+            let devicesList = document.getElementById('devices-list');
+            devicesList.innerHTML = '';
+            spinner.style.display = 'block'; // Show spinner
+
+            fetch('/bluetooth/scan')
+                .then(response => response.json())
+                .then(devices => {
+                    spinner.style.display = 'none'; // Hide spinner
+                    devicesList.innerHTML = '';
+                    devices.forEach(device => {
+                        let li = document.createElement('li');
+                        li.innerHTML = `<span>${device.name} (${device.address})</span>`;
+                        let pairButton = document.createElement('button');
+                        pairButton.textContent = 'Connect';
+                        pairButton.onclick = () => pairDevice(device.address);
+                        li.appendChild(pairButton);
+                        devicesList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    spinner.style.display = 'none'; // Hide spinner on error
+                    alert('Failed to scan devices.');
+                });
+        }
+
+        function pairDevice(deviceAddress) {
+            fetch(`/bluetooth/connect/${deviceAddress}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert('Device connected successfully!');
+                        // scanDevices(); // Refresh list automatically after pairing
+                        window.location.href = '/';
+                    } else {
+                        alert('Device connection failed!');
+                    }
+                });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Bluetooth Manager</h1>
+    <button onclick="scanDevices()">Scan for Devices</button>
+    <div id="loading-spinner" class="spinner"></div>
+    <ul id="devices-list"></ul>
+
+    <a href="/"><button class="back-button">Back</button></a>
+</body>
+
+</html>

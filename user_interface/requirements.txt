@@ -1,2 +1,2 @@
 Flask
-pybluez
+dbus-next
