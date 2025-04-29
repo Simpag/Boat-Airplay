@@ -1,3 +1,6 @@
+# Wifi manager
+Use this instead of the ``rc.local`` from [shairport-sync tutorial](https://github.com/mikebrady/shairport-sync/blob/master/CAR%20INSTALL.md) to allow connection to existing wifi's and use hotspot as a fallback.
+
 ## Install
 Make ``wifi_manager.sh`` executable:
 ```

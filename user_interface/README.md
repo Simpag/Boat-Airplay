@@ -1,6 +1,6 @@
 # 
 ## Description
-This is a more user friendly version of the simple bluetooth connector. It combines the discovery, pairing and trusting of bluetooth devices with the automatic connection with a user interface accessable on the pi's network.
+A user interface for adding new wifi networks and pairing with bluetooth devices
 
 ## Dependencies
 You must install the following packages on the Pi
