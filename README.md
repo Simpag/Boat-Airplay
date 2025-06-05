@@ -43,7 +43,7 @@ dtoverlay=pi3-disable-wifi
 
 Follow [shairport-sync tutorial](https://github.com/mikebrady/shairport-sync/blob/master/CAR%20INSTALL.md) to install shairport-sync airplay 2 and wifi hotspot
 
-Make rc.local executable by adding ``# chmod +x /etc/rc.local``:
+Make rc.local executable by adding ``# chmod +x /etc/rc.local``. Set the alsamixer output to 0db gain by adding `amixer set 'PCM',0 0db unmute` to the rc.local script.
 
 Example hostapd config 
 ```
