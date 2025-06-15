@@ -97,5 +97,7 @@ Change output device to ``bluealsa`` in ``/etc/shairport-sync.conf`` and increas
 ## Finishing
 This optional step is applicable to a Raspberry Pi only. Run sudo raspi-config and then choose Performance Options > Overlay Filesystem and choose to enable the overlay filesystem, and to set the boot partition to be write-protected. (The idea here is that this offers more protection against files being corrupted by the sudden removal of power.)
 
+If you want to shairport-sync to automatically restart on failure, see [here](https://ma.ttias.be/auto-restart-crashed-service-systemd/).
+
 ### Notes
 https://unix.stackexchange.com/questions/334386/how-to-set-up-automatic-connection-of-bluetooth-headset
