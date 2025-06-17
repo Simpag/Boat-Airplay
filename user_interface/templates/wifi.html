@@ -97,6 +97,48 @@
             /* Hidden by default */
         }
 
+        /* === tiny 5‑bar signal icon === */
+        .signal {
+            display: inline-flex;
+            gap: 2px;
+            /* spacing between bars   */
+            align-items: flex-end;
+            /* bars grow upward       */
+        }
+
+        .signal span {
+            /* one bar                */
+            width: 4px;
+            background: #ccc;
+            /* empty bar colour       */
+        }
+
+        .signal .filled {
+            background: #4CAF50;
+        }
+
+        /* green filled bar  */
+
+        .signal span:nth-child(1) {
+            height: 4px;
+        }
+
+        .signal span:nth-child(2) {
+            height: 6px;
+        }
+
+        .signal span:nth-child(3) {
+            height: 8px;
+        }
+
+        .signal span:nth-child(4) {
+            height: 10px;
+        }
+
+        .signal span:nth-child(5) {
+            height: 12px;
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -181,7 +223,7 @@
                         let deleteButton = document.createElement('button');
                         deleteButton.textContent = 'Remove';
                         deleteButton.className = 'remove-button'
-                        deleteButton.onclick = () => deleteSavedNetwork(device.ssid);
+                        deleteButton.onclick = () => deleteSavedNetwork(device.name);
                         li.appendChild(deleteButton);
                         savedDevicesList.appendChild(li);
                     });
@@ -219,10 +261,12 @@
                     devicesList.innerHTML = '';
                     devices.forEach(device => {
                         let li = document.createElement('li');
+                        const bars = makeSignalBars(device.signal);
+
                         if (device.in_use) {
-                            li.innerHTML = `<span>${device.ssid} - ${device.signal} Connected</span>`;
+                            li.innerHTML = `<span>Connected to: ${device.ssid} - ${bars}</span>`;
                         } else {
-                            li.innerHTML = `<span>${device.ssid} - ${device.signal}</span>`;
+                            li.innerHTML = `<span>${device.ssid} - ${bars}</span>`;
                         }
                         let pairButton = document.createElement('button');
                         pairButton.textContent = 'Connect';
@@ -235,6 +279,18 @@
                     spinner.style.display = 'none'; // Hide spinner on error
                     alert('Failed to scan devices.');
                 });
+        }
+
+        function makeSignalBars(strength) {
+            /* strength: 0‑100 → 0‑5 filled bars */
+            const filled = Math.round(strength / 20);   // 0…5
+            return (
+                '<span class="signal">' +
+                Array.from({ length: 5 }, (_, i) =>
+                    `<span class="${i < filled ? 'filled' : ''}"></span>`
+                ).join('') +
+                '</span>'
+            );
         }
 
         function showSuccess(ssid) {
