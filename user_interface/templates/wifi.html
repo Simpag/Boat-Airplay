@@ -75,10 +75,6 @@
             background-color: #45a049;
         }
 
-        li .signal {
-            margin-right: 10px;
-        }
-
         .remove-button {
             background-color: #f32121;
         }
@@ -274,7 +270,7 @@
                     devices.forEach(device => {
                         let li = document.createElement('li');
                         const bars = makeSignalBars(device.signal);
-                        li.innerHTML = `${bars} <span>${device.ssid}</span>`;
+                        li.innerHTML = `<span>${bars}  ${device.ssid}</span>`;
                         let pairButton = document.createElement('button');
 
                         if (device.in_use) {
