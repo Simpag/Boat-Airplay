@@ -56,6 +56,16 @@ def scan_wifi_networks():
     return jsonify(devices)
 
 
+@app.route("/wifi/networks")
+def get_saved_networks():
+    connections = nmcli.connection()
+    connections = [{"name": n.name} for n in connections if n.conn_type == "wifi"]
+    if DEBUG:
+        print("Found connections: ", connections)
+
+    return jsonify(connections)
+
+
 # Route to pair and trust a device
 @app.route("/wifi/connect", methods=["POST"])
 def connect_wifi():
@@ -73,7 +83,7 @@ def connect_wifi():
     try:
         nmcli.device.wifi_connect(ssid, password, "wlan0")
     except nmcli.ConnectionActivateFailedException as e:
-        remove_wifi(ssid)
+        _remove_wifi(ssid)
         success = False
 
     if DEBUG:
@@ -82,8 +92,29 @@ def connect_wifi():
     return jsonify({"status": success, "ssid": ssid})
 
 
-def remove_wifi(ssid: str):
-    nmcli.connection.delete(ssid)
+@app.route("wifi/remove", methods=["POST"])
+def remove_wifi_network():
+    data = request.get_json(force=True)
+    ssid = data.get("ssid")
+
+    if DEBUG:
+        print("Trying to remove: ", ssid)
+
+    success = _remove_wifi(ssid)
+
+    if DEBUG:
+        print("Connection result: ", {"status": success, "ssid": ssid})
+
+    return jsonify({"status": success, "ssid": ssid})
+
+
+def _remove_wifi(ssid: str):
+    try:
+        nmcli.connection.delete(ssid)
+    except Exception as e:
+        return False
+    
+    return True
 
 
 # ----------- Bluetooth Management ------------

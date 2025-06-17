@@ -132,6 +132,8 @@
     <div id="loading-spinner" class="spinner"></div>
     <ul id="devices-list"></ul>
 
+    <h2>Saved networks:</h2>
+    <ul id="saved-devices-list"></ul>
     <a href="/"><button class="back-button">Back</button></a>
 
     <dialog id="pw-dialog">
@@ -157,6 +159,44 @@
     </dialog>
 
     <script>
+        function getSavedNetworks() {
+            let savedDevicesList = document.getElementById('saved-devices-list');
+            savedDevicesList.innerHTML = '';
+
+            fetch('/wifi/networks')
+                .then(response => response.json())
+                .then(devices => {
+                    savedDevicesList.innerHTML = '';
+                    devices.forEach(device => {
+                        let li = document.createElement('li');
+                        li.innerHTML = `<span>${device.name}</span>`;
+                        let deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Connect';
+                        deleteButton.onclick = () => deleteSavedNetwork(device.ssid);
+                        li.appendChild(deleteButton);
+                        savedDevicesList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    alert('Failed to list saved networks.');
+                });
+        }
+
+        function deleteSavedNetwork(ssid) {
+            fetch('/wifi/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ssid, password }),
+                signal: ctrl.signal
+            }).then(data => {
+                if (data.status) {          // we got a JSON reply AND nmcli said “OK”
+                    getSavedNetworks();
+                } else {                    // JSON reply but nmcli failed
+                    alert('Could not remove network!');
+                }
+            })
+        }
+
         function scanNetworks() {
             let spinner = document.getElementById('loading-spinner');
             let devicesList = document.getElementById('devices-list');
