@@ -67,6 +67,14 @@
             background-color: #1976D2;
         }
 
+        .remove-button {
+            background-color: #f32121;
+        }
+
+        .remove-button:hover {
+            background-color: #d21919;
+        }
+
         .back-button {
             background-color: #555;
             margin-top: 2em;
@@ -133,7 +141,7 @@
     <ul id="devices-list"></ul>
 
     <h2>Saved networks:</h2>
-    <ul id="saved-devices-list" onload="getSavedNetworks()"></ul>
+    <ul id="saved-devices-list"></ul>
     <a href="/"><button class="back-button">Back</button></a>
 
     <dialog id="pw-dialog">
@@ -171,7 +179,8 @@
                         let li = document.createElement('li');
                         li.innerHTML = `<span>${device.name}</span>`;
                         let deleteButton = document.createElement('button');
-                        deleteButton.textContent = 'Connect';
+                        deleteButton.textContent = 'Remove';
+                        deleteButton.className = 'remove-button'
                         deleteButton.onclick = () => deleteSavedNetwork(device.ssid);
                         li.appendChild(deleteButton);
                         savedDevicesList.appendChild(li);
@@ -181,6 +190,7 @@
                     alert('Failed to list saved networks.');
                 });
         }
+        getSavedNetworks();
 
         function deleteSavedNetwork(ssid) {
             fetch('/wifi/remove', {
