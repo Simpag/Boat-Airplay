@@ -1,6 +1,7 @@
 import asyncio
 from bleak import BleakScanner, BleakClient
 import subprocess
+import nmcli
 
 from flask import Flask, render_template, jsonify, request, redirect
 
@@ -9,41 +10,56 @@ app = Flask(__name__)
 
 # Constants
 DEBUG = True
-WPA_SUPPLICANT_CONF = (
-    "test_wpa_supplicant.conf"  # "/etc/wpa_supplicant/wpa_supplicant.conf"
-)
 
 
 # ----------- WiFi Management ------------
 ## TODO: Show currently saved WiFi networks and allow them to be removed.
-@app.route("/wifi", methods=["GET", "POST"])
+@app.route("/wifi")
 def wifi_setup():
-    if request.method == "POST":
-        ssid = request.form["ssid"]
-        password = request.form["password"]
-        add_wifi_network(ssid, password)
-        restart_wifi_manager()
-        return redirect("/")
     return render_template("wifi.html")
 
 
 def add_wifi_network(ssid, password):
-    network_block = f"""
-network={{
-    ssid="{ssid}"
-    psk="{password}"
-}}
-"""
 
     if DEBUG:
-        print(f"Adding network block to {WPA_SUPPLICANT_CONF}:\n{network_block}")
-
-    with open(WPA_SUPPLICANT_CONF, "a") as f:
-        f.write(network_block)
+        print(f"Adding network {ssid}:\n{password}")
 
 
-def restart_wifi_manager():
-    subprocess.run(["sudo", "systemctl", "restart", "wifi-manager.service"])
+# Function to scan for wifi networks
+@app.route("/wifi/scan")
+def scan_wifi_networks():
+    if DEBUG:
+        print("Scanning for wifi networks...")
+
+    results = nmcli.device.wifi(rescan=True)
+
+    devices = [
+        {"ssid": r.ssid, "in_use": r.in_use, "signal": r.signal} for r in results
+    ]
+
+    if DEBUG:
+        print("Found devices:", devices)
+
+    return jsonify(devices)
+
+
+# Route to pair and trust a device
+@app.route("/wifi/connect", methods=["POST"])
+def connect_wifi():
+    """
+    Body (JSON): { "ssid": "<network-name>", "password": "<secret>" }
+    """
+    data = request.get_json(force=True)
+    ssid = data.get("ssid")
+    password = data.get("password")
+
+    success = True
+    try:
+        nmcli.device.wifi_connect(ssid, password)
+    except nmcli.ConnectionActivateFailedException as e:
+        success = False
+
+    return jsonify({"status": success, "ssid": ssid})
 
 
 # ----------- Bluetooth Management ------------

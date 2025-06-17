@@ -3,16 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>WiFi Setup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Manager</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: flex-start;
             min-height: 100vh;
             margin: 0;
+            padding: 2em;
             background: #f5f7fa;
             text-align: center;
         }
@@ -22,30 +24,15 @@
             color: #333;
         }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1em;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            padding: 0.8em;
-            font-size: 1em;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
         button {
-            padding: 1em;
+            padding: 1em 2em;
             font-size: 1.1em;
             background-color: #4CAF50;
             border: none;
             color: white;
             border-radius: 8px;
             cursor: pointer;
+            margin: 1em 0;
             transition: background-color 0.3s, transform 0.2s;
         }
 
@@ -54,25 +41,147 @@
             transform: scale(1.05);
         }
 
+        ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        li {
+            background: white;
+            margin: 0.5em 0;
+            padding: 1em;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li button {
+            background-color: #2196F3;
+        }
+
+        li button:hover {
+            background-color: #1976D2;
+        }
+
         .back-button {
-            margin-top: 2em;
             background-color: #555;
+            margin-top: 2em;
         }
 
         .back-button:hover {
             background-color: #333;
         }
+
+        /* Loading Spinner */
+        .spinner {
+            margin-top: 2em;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+            /* Hidden by default */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
+    <script>
+        function scanDevices() {
+            let spinner = document.getElementById('loading-spinner');
+            let devicesList = document.getElementById('devices-list');
+            devicesList.innerHTML = '';
+            spinner.style.display = 'block'; // Show spinner
+
+            fetch('/wifi/scan')
+                .then(response => response.json())
+                .then(devices => {
+                    spinner.style.display = 'none'; // Hide spinner
+                    devicesList.innerHTML = '';
+                    devices.forEach(device => {
+                        let li = document.createElement('li');
+                        li.innerHTML = `<span>(${device.in_use}) ${device.ssid} - ${device.signal}</span>`;
+                        let pairButton = document.createElement('button');
+                        pairButton.textContent = 'Connect';
+                        pairButton.onclick = () => openPasswordDialog(device.ssid);
+                        li.appendChild(pairButton);
+                        devicesList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    spinner.style.display = 'none'; // Hide spinner on error
+                    alert('Failed to scan devices.');
+                });
+        }
+
+        function openPasswordDialog(ssid) {
+            const dlg = document.getElementById('pw-dialog');
+            const ssidSpan = document.getElementById('dialog-ssid');
+            ssidSpan.textContent = ssid;
+            dlg.returnValue = '';               // clear any previous result
+            dlg.showModal();
+
+            // When the OK button is pressed <form> submits → onsubmit ↓
+            dlg.onsubmit = (ev) => {
+                ev.preventDefault();            // don’t reload page
+                const password = document.getElementById('pw-input').value;
+                dlg.close();
+                connectToWifi(ssid, password);
+            };
+        }
+
+        function connectToWifi(ssid, password) {
+            fetch('/wifi/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ssid, password })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status) {
+                        alert(`Connected to ${data.ssid}`);
+                        window.location = '/';
+                    } else {
+                        alert('Connection failed');
+                    }
+                })
+                .catch(() => alert('Connection failed'));
+        }
+    </script>
 </head>
 
 <body>
-    <h1>WiFi Setup</h1>
-    <form method="POST">
-        <input type="text" name="ssid" placeholder="WiFi SSID" required>
-        <input type="password" name="password" placeholder="WiFi Password" required>
-        <button type="submit">Connect</button>
-    </form>
+    <h1>Wi-Fi Manager</h1>
+    <button onclick="scanDevices()">Scan for Wi-Fi networks</button>
+    <div id="loading-spinner" class="spinner"></div>
+    <ul id="devices-list"></ul>
+
     <a href="/"><button class="back-button">Back</button></a>
+
+    <dialog id="pw-dialog">
+        <form method="dialog">
+            <h3>Connect to <span id="dialog-ssid"></span></h3>
+            <input id="pw-input" type="password" placeholder="Wi‑Fi password" required
+                style="padding:0.5em;width:100%;margin:1em 0;border-radius:6px;">
+            <div style="display:flex;justify-content: flex-end;gap:1em;">
+                <button value="cancel">Cancel</button>
+                <button type="submit">Connect</button>
+            </div>
+        </form>
+    </dialog>
 </body>
 
 </html>
