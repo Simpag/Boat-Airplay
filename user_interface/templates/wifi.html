@@ -139,7 +139,7 @@
             <h3>Connect to <span id="dialog-ssid"></span></h3>
             <input id="pw-input" type="password" placeholder="Wi-Fi password" required
                 style="padding:0.5em;width:100%;margin:1em 0;border-radius:6px;">
-            <div style="display:flex;justify-content: flex-end;gap:1em;">
+            <div style="display:flex; justify-content:center; gap:1em; margin-top:1em;">
                 <button value="cancel" formnovalidate>Cancel</button>
                 <button type="submit">Connect</button>
             </div>
@@ -262,7 +262,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ssid, password }),
                 signal: ctrl.signal
-            })//.then(r => r.json());
+            }).then(r => r.json())
                 .finally(() => clearTimeout(timer));  // always clear the timer
         }
 

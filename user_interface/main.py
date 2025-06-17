@@ -77,7 +77,7 @@ def connect_wifi():
         success = False
 
     if DEBUG:
-        print("Connection result: ", jsonify({"status": success, "ssid": ssid}))
+        print("Connection result: ", {"status": success, "ssid": ssid})
 
     return jsonify({"status": success, "ssid": ssid})
 
