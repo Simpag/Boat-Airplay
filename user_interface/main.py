@@ -19,12 +19,6 @@ def wifi_setup():
     return render_template("wifi.html")
 
 
-def add_wifi_network(ssid, password):
-
-    if DEBUG:
-        print(f"Adding network {ssid}:\n{password}")
-
-
 # Function to scan for wifi networks
 @app.route("/wifi/scan")
 def scan_wifi_networks():
@@ -66,6 +60,9 @@ def connect_wifi():
     data = request.get_json(force=True)
     ssid = data.get("ssid")
     password = data.get("password")
+
+    if DEBUG:
+        print("Trying to connect to: ", ssid, " with password: ", password)
 
     success = True
     try:
