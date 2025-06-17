@@ -124,6 +124,38 @@
             box-sizing: border-box;
         }
     </style>
+</head>
+
+<body>
+    <h1>Wi-Fi Manager</h1>
+    <button onclick="scanNetworks()">Scan for Wi-Fi networks</button>
+    <div id="loading-spinner" class="spinner"></div>
+    <ul id="devices-list"></ul>
+
+    <a href="/"><button class="back-button">Back</button></a>
+
+    <dialog id="pw-dialog">
+        <form method="dialog">
+            <h3>Connect to <span id="dialog-ssid"></span></h3>
+            <input id="pw-input" type="password" placeholder="Wi-Fi password" required
+                style="padding:0.5em;width:100%;margin:1em 0;border-radius:6px;">
+            <div style="display:flex;justify-content: flex-end;gap:1em;">
+                <button value="cancel" formnovalidate>Cancel</button>
+                <button type="submit">Connect</button>
+            </div>
+            <div id="connect-spinner" class="spinner" style="display:none;margin:1em auto;"></div>
+        </form>
+    </dialog>
+
+    <dialog id="success-dialog">
+        <h3>Connected!</h3>
+        <p>You are now connected to <strong id="success-ssid"></strong>.<br>
+            Switch your phone / PC to that same network, then reload this page to keep managing the device.</p>
+        <div style="text-align:center;margin-top:1.5em">
+            <button id="success-close">OK</button>
+        </div>
+    </dialog>
+
     <script>
         function scanNetworks() {
             let spinner = document.getElementById('loading-spinner');
@@ -156,9 +188,18 @@
                 });
         }
 
+        function showSuccess(ssid) {
+            const dlg = document.getElementById('success-dialog');
+            document.getElementById('success-ssid').textContent = ssid;
+            dlg.showModal();
+        }
+        document.getElementById('success-close').onclick = () =>
+            document.getElementById('success-dialog').close();
+
         function openPasswordDialog(ssid) {
             const dlg = document.getElementById('pw-dialog');
             const ssidSpan = document.getElementById('dialog-ssid');
+            const passwordEl = document.getElementById('pw-input');
             const spinnerEl = document.getElementById('connect-spinner');
 
             ssidSpan.textContent = ssid;
@@ -175,7 +216,7 @@
                     return;
                 }
 
-                const password = document.getElementById('pw-input').value;
+                const password = passwordEl.value;
                 /* 1. lock UI & show spinner */
                 dlg.querySelectorAll('input, button').forEach(el => el.disabled = true);
                 spinnerEl.style.display = 'block';
@@ -183,17 +224,19 @@
                 /* 2. kick off the request; return its Promise so we can chain */
                 connectToWifi(ssid, password)
                     .then(data => {
-                        if (data.status) {
-                            dlg.close();                 // close the dialog
-                            scanDevices();
-                        } else {
+                        if (data.status) {          // we got a JSON reply AND nmcli said “OK”
+                            showSuccess(ssid);      // treat as success
+                        } else {                    // JSON reply but nmcli failed
                             alert('Connection failed');
                         }
                     })
-                    .catch(() => alert('Connection failed'))
+                    .catch(() => {                  // <‑‑ fetch could not finish → likely lost IP
+                        showSuccess(ssid);          // assume connect succeeded and IP changed
+                    })
                     .finally(() => {
                         /* 3. restore UI & close */
                         spinnerEl.style.display = 'none';
+                        passwordEl.value = '';
                         dlg.querySelectorAll('input, button').forEach(el => el.disabled = false);
                         dlg.close();
                     });
@@ -212,28 +255,6 @@
             document.getElementById('pw-input').value = '';
         });
     </script>
-</head>
-
-<body>
-    <h1>Wi-Fi Manager</h1>
-    <button onclick="scanNetworks()">Scan for Wi-Fi networks</button>
-    <div id="loading-spinner" class="spinner"></div>
-    <ul id="devices-list"></ul>
-
-    <a href="/"><button class="back-button">Back</button></a>
-
-    <dialog id="pw-dialog">
-        <form method="dialog">
-            <h3>Connect to <span id="dialog-ssid"></span></h3>
-            <input id="pw-input" type="password" placeholder="Wi-Fi password" required
-                style="padding:0.5em;width:100%;margin:1em 0;border-radius:6px;">
-            <div style="display:flex;justify-content: flex-end;gap:1em;">
-                <button value="cancel" formnovalidate>Cancel</button>
-                <button type="submit">Connect</button>
-            </div>
-            <div id="connect-spinner" class="spinner" style="display:none;margin:1em auto;"></div>
-        </form>
-    </dialog>
 </body>
 
 </html>

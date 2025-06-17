@@ -39,7 +39,17 @@ def scan_wifi_networks():
         if r.ssid in ssids_found:
             continue
 
-        devices.append({"ssid": r.ssid, "in_use": r.in_use, "signal": r.signal})
+        same_ssids = [rr for rr in results if rr.ssid == r.ssid]
+        best_signal = max(same_ssids, key=lambda x: x.signal)
+
+        ssids_found.add(best_signal.ssid)
+        devices.append(
+            {
+                "ssid": best_signal.ssid,
+                "in_use": best_signal.in_use,
+                "signal": best_signal.signal,
+            }
+        )
 
     if DEBUG:
         print("Found devices:", devices)
