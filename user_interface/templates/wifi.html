@@ -67,6 +67,18 @@
             background-color: #1976D2;
         }
 
+        li .connected {
+            background-color: #21f32c;
+        }
+
+        li .connected:hover {
+            background-color: #19d219;
+        }
+
+        li .signal {
+            margin-left: auto;
+        }
+
         .remove-button {
             background-color: #f32121;
         }
@@ -262,15 +274,16 @@
                     devices.forEach(device => {
                         let li = document.createElement('li');
                         const bars = makeSignalBars(device.signal);
+                        li.innerHTML = `<span>${device.ssid}</span>${bars}`;
+                        let pairButton = document.createElement('button');
 
                         if (device.in_use) {
-                            li.innerHTML = `<span>Connected to: ${device.ssid} - ${bars}</span>`;
+                            pairButton.textContent = 'Connected';
+                            pairButton.className = 'connected'
                         } else {
-                            li.innerHTML = `<span>${device.ssid} - ${bars}</span>`;
+                            pairButton.textContent = 'Connect';
+                            pairButton.onclick = () => openPasswordDialog(device.ssid);
                         }
-                        let pairButton = document.createElement('button');
-                        pairButton.textContent = 'Connect';
-                        pairButton.onclick = () => openPasswordDialog(device.ssid);
                         li.appendChild(pairButton);
                         devicesList.appendChild(li);
                     });
