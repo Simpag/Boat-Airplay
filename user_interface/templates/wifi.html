@@ -98,6 +98,31 @@
                 transform: rotate(360deg);
             }
         }
+
+        dialog {
+            border: none;
+            border-radius: 10px;
+            padding: 2em;
+            max-width: 90vw;
+            width: 300px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-align: left;
+            overflow: hidden;
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        dialog h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+
+        dialog input {
+            width: 100%;
+            box-sizing: border-box;
+        }
     </style>
     <script>
         function scanDevices() {
@@ -160,6 +185,10 @@
                 })
                 .catch(() => alert('Connection failed'));
         }
+
+        document.getElementById('pw-dialog').addEventListener('close', () => {
+            document.getElementById('pw-input').value = '';
+        });
     </script>
 </head>
 
@@ -174,10 +203,10 @@
     <dialog id="pw-dialog">
         <form method="dialog">
             <h3>Connect to <span id="dialog-ssid"></span></h3>
-            <input id="pw-input" type="password" placeholder="Wi‑Fi password" required
+            <input id="pw-input" type="password" placeholder="Wi-Fi password" required
                 style="padding:0.5em;width:100%;margin:1em 0;border-radius:6px;">
             <div style="display:flex;justify-content: flex-end;gap:1em;">
-                <button value="cancel">Cancel</button>
+                <button value="cancel" formnovalidate>Cancel</button>
                 <button type="submit">Connect</button>
             </div>
         </form>

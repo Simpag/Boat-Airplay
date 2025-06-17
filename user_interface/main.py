@@ -33,9 +33,13 @@ def scan_wifi_networks():
 
     results = nmcli.device.wifi(rescan=True)
 
-    devices = [
-        {"ssid": r.ssid, "in_use": r.in_use, "signal": r.signal} for r in results
-    ]
+    ssids_found = set()
+    devices = []
+    for r in results:
+        if r.ssid in ssids_found:
+            continue
+
+        devices.append({"ssid": r.ssid, "in_use": r.in_use, "signal": r.signal})
 
     if DEBUG:
         print("Found devices:", devices)
