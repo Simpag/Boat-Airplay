@@ -34,14 +34,19 @@ def scan_wifi_networks():
             continue
 
         same_ssids = [rr for rr in results if rr.ssid == r.ssid]
-        best_signal = max(same_ssids, key=lambda x: x.signal)
+        is_in_use = [ss for ss in same_ssids if ss.in_use]
 
-        ssids_found.add(best_signal.ssid)
+        if len(is_in_use) == 0:
+            to_show = max(same_ssids, key=lambda x: x.signal)
+        else:
+            to_show = is_in_use[0]
+
+        ssids_found.add(to_show.ssid)
         devices.append(
             {
-                "ssid": best_signal.ssid,
-                "in_use": best_signal.in_use,
-                "signal": best_signal.signal,
+                "ssid": to_show.ssid,
+                "in_use": to_show.in_use,
+                "signal": to_show.signal,
             }
         )
 
@@ -68,9 +73,17 @@ def connect_wifi():
     try:
         nmcli.device.wifi_connect(ssid, password, "wlan0")
     except nmcli.ConnectionActivateFailedException as e:
+        remove_wifi(ssid)
         success = False
 
+    if DEBUG:
+        print("Connection result: ", jsonify({"status": success, "ssid": ssid}))
+
     return jsonify({"status": success, "ssid": ssid})
+
+
+def remove_wifi(ssid: str):
+    nmcli.connection.delete(ssid)
 
 
 # ----------- Bluetooth Management ------------

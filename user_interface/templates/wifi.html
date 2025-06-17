@@ -234,7 +234,6 @@
                     })
                     .catch(err => {
                         /* AbortError = our own timeout = likely switched IP */
-                        print(err);
                         if (err.name === 'AbortError') {
                             showSuccess(ssid);
                         } else {
