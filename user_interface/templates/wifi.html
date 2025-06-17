@@ -339,6 +339,7 @@
                 let failed = false;
                 connectToWifi(ssid, password)
                     .then(data => {
+                        data = data.json();
                         if (data.status) {          // we got a JSON reply AND nmcli said “OK”
                             showSuccess(ssid);      // treat as success
                         } else {                    // JSON reply but nmcli failed
@@ -376,7 +377,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ssid, password }),
                 signal: ctrl.signal
-            }).then(r => r.json())
+            })
                 .finally(() => clearTimeout(timer));  // always clear the timer
         }
 
