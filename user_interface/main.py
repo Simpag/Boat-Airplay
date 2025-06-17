@@ -66,7 +66,7 @@ def connect_wifi():
 
     success = True
     try:
-        nmcli.device.wifi_connect(ssid, password)
+        nmcli.device.wifi_connect(ssid, password, "wlan0")
     except nmcli.ConnectionActivateFailedException as e:
         success = False
 
