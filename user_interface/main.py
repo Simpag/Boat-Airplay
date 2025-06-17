@@ -92,7 +92,7 @@ def connect_wifi():
     return jsonify({"status": success, "ssid": ssid})
 
 
-@app.route("wifi/remove", methods=["POST"])
+@app.route("/wifi/remove", methods=["POST"])
 def remove_wifi_network():
     data = request.get_json(force=True)
     ssid = data.get("ssid")

@@ -183,11 +183,10 @@
         }
 
         function deleteSavedNetwork(ssid) {
-            fetch('/wifi/connect', {
+            fetch('/wifi/remove', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ssid, password }),
-                signal: ctrl.signal
+                body: JSON.stringify({ ssid }),
             }).then(data => {
                 if (data.status) {          // we got a JSON reply AND nmcli said “OK”
                     getSavedNetworks();
