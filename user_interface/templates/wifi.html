@@ -367,7 +367,7 @@
         }
 
         function connectToWifi(ssid, password) {
-            const CONNECT_TIMEOUT = 6_000;
+            const CONNECT_TIMEOUT = 10_000;
 
             const ctrl = new AbortController();
             const timer = setTimeout(() => ctrl.abort(), CONNECT_TIMEOUT);
