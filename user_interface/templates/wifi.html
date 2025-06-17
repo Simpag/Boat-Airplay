@@ -125,7 +125,7 @@
         }
     </style>
     <script>
-        function scanDevices() {
+        function scanNetworks() {
             let spinner = document.getElementById('loading-spinner');
             let devicesList = document.getElementById('devices-list');
             devicesList.innerHTML = '';
@@ -138,7 +138,11 @@
                     devicesList.innerHTML = '';
                     devices.forEach(device => {
                         let li = document.createElement('li');
-                        li.innerHTML = `<span>(${device.in_use}) ${device.ssid} - ${device.signal}</span>`;
+                        if (device.in_use) {
+                            li.innerHTML = `<span>${device.ssid} - ${device.signal} Connected</span>`;
+                        } else {
+                            li.innerHTML = `<span>${device.ssid} - ${device.signal}</span>`;
+                        }
                         let pairButton = document.createElement('button');
                         pairButton.textContent = 'Connect';
                         pairButton.onclick = () => openPasswordDialog(device.ssid);
@@ -155,6 +159,8 @@
         function openPasswordDialog(ssid) {
             const dlg = document.getElementById('pw-dialog');
             const ssidSpan = document.getElementById('dialog-ssid');
+            const spinnerEl = document.getElementById('connect-spinner');
+
             ssidSpan.textContent = ssid;
             dlg.returnValue = '';               // clear any previous result
             dlg.showModal();
@@ -162,28 +168,44 @@
             // When the OK button is pressed <form> submits → onsubmit ↓
             dlg.onsubmit = (ev) => {
                 ev.preventDefault();            // don’t reload page
+
+                /* was it the Cancel button? */
+                if (ev.submitter && ev.submitter.value === 'cancel') {
+                    dlg.close();                    // just close; do nothing else
+                    return;
+                }
+
                 const password = document.getElementById('pw-input').value;
-                dlg.close();
-                connectToWifi(ssid, password);
+                /* 1. lock UI & show spinner */
+                dlg.querySelectorAll('input, button').forEach(el => el.disabled = true);
+                spinnerEl.style.display = 'block';
+
+                /* 2. kick off the request; return its Promise so we can chain */
+                connectToWifi(ssid, password)
+                    .then(data => {
+                        if (data.status) {
+                            dlg.close();                 // close the dialog
+                            scanDevices();
+                        } else {
+                            alert('Connection failed');
+                        }
+                    })
+                    .catch(() => alert('Connection failed'))
+                    .finally(() => {
+                        /* 3. restore UI & close */
+                        spinnerEl.style.display = 'none';
+                        dlg.querySelectorAll('input, button').forEach(el => el.disabled = false);
+                        dlg.close();
+                    });
             };
         }
 
         function connectToWifi(ssid, password) {
-            fetch('/wifi/connect', {
+            return fetch('/wifi/connect', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ssid, password })
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.status) {
-                        alert(`Connected to ${data.ssid}`);
-                        window.location = '/';
-                    } else {
-                        alert('Connection failed');
-                    }
-                })
-                .catch(() => alert('Connection failed'));
+            }).then(r => r.json());
         }
 
         document.getElementById('pw-dialog').addEventListener('close', () => {
@@ -194,7 +216,7 @@
 
 <body>
     <h1>Wi-Fi Manager</h1>
-    <button onclick="scanDevices()">Scan for Wi-Fi networks</button>
+    <button onclick="scanNetworks()">Scan for Wi-Fi networks</button>
     <div id="loading-spinner" class="spinner"></div>
     <ul id="devices-list"></ul>
 
@@ -209,6 +231,7 @@
                 <button value="cancel" formnovalidate>Cancel</button>
                 <button type="submit">Connect</button>
             </div>
+            <div id="connect-spinner" class="spinner" style="display:none;margin:1em auto;"></div>
         </form>
     </dialog>
 </body>
