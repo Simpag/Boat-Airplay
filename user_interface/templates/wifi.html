@@ -68,15 +68,15 @@
         }
 
         li .connected {
-            background-color: #21f32c;
+            background-color: #19c736;
         }
 
         li .connected:hover {
-            background-color: #19d219;
+            background-color: #14b414;
         }
 
         li .signal {
-            margin-left: auto;
+            margin-right: 10px;
         }
 
         .remove-button {
@@ -274,7 +274,7 @@
                     devices.forEach(device => {
                         let li = document.createElement('li');
                         const bars = makeSignalBars(device.signal);
-                        li.innerHTML = `<span>${device.ssid}</span>${bars}`;
+                        li.innerHTML = `${bars} <span>${device.ssid}</span>`;
                         let pairButton = document.createElement('button');
 
                         if (device.in_use) {
