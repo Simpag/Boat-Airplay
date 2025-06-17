@@ -36,7 +36,7 @@ def scan_wifi_networks():
     ssids_found = set()
     devices = []
     for r in results:
-        if r.ssid in ssids_found:
+        if r.ssid in ssids_found or r.ssid == "" or r.ssid == None:
             continue
 
         same_ssids = [rr for rr in results if rr.ssid == r.ssid]

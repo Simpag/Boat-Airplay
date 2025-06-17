@@ -222,33 +222,48 @@
                 spinnerEl.style.display = 'block';
 
                 /* 2. kick off the request; return its Promise so we can chain */
+                let failed = false;
                 connectToWifi(ssid, password)
                     .then(data => {
                         if (data.status) {          // we got a JSON reply AND nmcli said “OK”
                             showSuccess(ssid);      // treat as success
                         } else {                    // JSON reply but nmcli failed
+                            failed = true;
                             alert('Connection failed');
                         }
                     })
-                    .catch(() => {                  // <‑‑ fetch could not finish → likely lost IP
-                        showSuccess(ssid);          // assume connect succeeded and IP changed
+                    .catch(err => {
+                        /* AbortError = our own timeout = likely switched IP */
+                        if (err.name === 'AbortError') {
+                            showSuccess(ssid);
+                        } else {
+                            alert('Connection failed');
+                        }
                     })
                     .finally(() => {
                         /* 3. restore UI & close */
                         spinnerEl.style.display = 'none';
                         passwordEl.value = '';
                         dlg.querySelectorAll('input, button').forEach(el => el.disabled = false);
-                        dlg.close();
+                        if (!failed)
+                            dlg.close();
                     });
             };
         }
 
         function connectToWifi(ssid, password) {
+            const CONNECT_TIMEOUT = 6_000;
+
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), CONNECT_TIMEOUT);
+
             return fetch('/wifi/connect', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ssid, password })
-            }).then(r => r.json());
+                body: JSON.stringify({ ssid, password }),
+                signal: ctrl.signal
+            })//.then(r => r.json());
+                .finally(() => clearTimeout(timer));  // always clear the timer
         }
 
         document.getElementById('pw-dialog').addEventListener('close', () => {
