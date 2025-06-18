@@ -169,7 +169,6 @@ def connect_to_device(device_address):
         client = BleakClient(device_address)
 
         try:
-            await client.pair()
             await client.connect()
         except Exception as e:
             print(e)
@@ -177,7 +176,29 @@ def connect_to_device(device_address):
 
         return True
 
-    return asyncio.run(bt_con())
+    paired = asyncio.run(bt_con())
+
+    if not paired:
+        print("Failed to pair!")
+        return False
+
+    ret = subprocess.run(
+        ["bluetoothctl", "connect", device_address],
+        shell=False,
+        capture_output=True,
+    )
+
+    if "Connection successful" not in ret.stdout.decode():
+        if DEBUG:
+            print(
+                "Could not connect to device: ",
+                device_address,
+                " stdout: ",
+                ret.stdout.decode(),
+            )
+        return False
+
+    return True
 
 
 # Route to the main page (web UI)
