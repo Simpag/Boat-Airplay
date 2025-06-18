@@ -27,7 +27,7 @@ def scan_wifi_networks():
 
     results = nmcli.device.wifi(rescan=True)
 
-    ssids_found = set()
+    ssids_found = {"RPI-Hotspot"}  # Dont include itself
     devices = []
     for r in results:
         if r.ssid in ssids_found or r.ssid == "" or r.ssid == None:
@@ -59,7 +59,11 @@ def scan_wifi_networks():
 @app.route("/wifi/networks")
 def get_saved_networks():
     connections = nmcli.connection()
-    connections = [{"name": n.name} for n in connections if n.conn_type == "wifi"]
+    connections = [
+        {"name": n.name}
+        for n in connections
+        if n.conn_type == "wifi" and n.name != "RPI-Hotspot"
+    ]  # Dont include itself
     if DEBUG:
         print("Found connections: ", connections)
 
@@ -113,7 +117,7 @@ def _remove_wifi(ssid: str):
         nmcli.connection.delete(ssid)
     except Exception as e:
         return False
-    
+
     return True
 
 
@@ -167,9 +171,8 @@ def connect_to_device(device_address):
         except Exception as e:
             print(e)
             return False
-        finally:
-            await client.disconnect()
-            return True
+
+        return True
 
     return asyncio.run(bt_con())
 
@@ -180,6 +183,33 @@ def index():
     return render_template("index.html")
 
 
+def setup_hotspot():
+    connections = nmcli.connection()
+    connections = [n.name for n in connections if n.conn_type == "wifi"]
+
+    if "RPI-Hotspot" in connections:
+        print("Hotspot already set up, skipping")
+        return
+
+    print("Setting up hotspot...")
+    nmcli.device.wifi_hotspot(
+        ssid="AirplayBridge", password="12345678", channel=11, con_name="RPI-Hotspot"
+    )
+
+    nmcli.connection.modify(
+        "RPI-Hotspot",
+        {
+            "ipv4.addresses": "10.0.10.1/24",
+            "ipv4.method": "manual",
+            "ipv4.gateway": '""',
+            "ipv4.dns": '""',
+            "connection.autoconnect": "yes",
+            "connection.autoconnect-priority": -1,
+        },
+    )
+
+
 if __name__ == "__main__":
     # Start the connection loop in a background thread
+    setup_hotspot()
     app.run(host="0.0.0.0", port=5001)  # Accessible on the Pi's IP address
