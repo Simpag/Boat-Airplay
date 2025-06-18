@@ -204,8 +204,8 @@ def setup_hotspot():
         {
             "ipv4.addresses": "10.0.10.1/24",
             "ipv4.method": "manual",
-            "ipv4.gateway": '""',
-            "ipv4.dns": '""',
+            "ipv4.gateway": "",
+            "ipv4.dns": "",
             "connection.autoconnect": "yes",
             "connection.autoconnect-priority": "-1",
         },
