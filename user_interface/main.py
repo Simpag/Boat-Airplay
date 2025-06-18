@@ -161,7 +161,10 @@ def scan_bluetooth_devices():
 def connected_device():
     _, name = _get_connected_devices()
 
-    return jsonify([{"name": name}])
+    if name != "":
+        return jsonify([{"name": name}])
+
+    return jsonify([])
 
 
 @app.route("/bluetooth/disconnect")
