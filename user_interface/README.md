@@ -22,3 +22,10 @@ dhcp-range=10.0.10.10,10.0.10.150,12h
 port=0
 no-resolv
 ```
+
+Install all required python packages ``pip install -r requirements.txt``.
+
+Setup hotspot to be active if no other networks are available:
+```
+python setup_hotspot.py
+```

@@ -13,7 +13,6 @@ DEBUG = True
 
 
 # ----------- WiFi Management ------------
-## TODO: Show currently saved WiFi networks and allow them to be removed.
 @app.route("/wifi")
 def wifi_setup():
     return render_template("wifi.html")
@@ -70,7 +69,6 @@ def get_saved_networks():
     return jsonify(connections)
 
 
-# Route to pair and trust a device
 @app.route("/wifi/connect", methods=["POST"])
 def connect_wifi():
     """
@@ -135,10 +133,14 @@ def scan_bluetooth_devices():
 
     async def bt_scan():
         nearby_devices = await BleakScanner.discover(timeout=8)
+
+        if DEBUG:
+            print("All devices: ", nearby_devices)
+
         return [
             {"name": dev.name, "address": dev.address}
             for dev in nearby_devices
-            if dev.address != dev.name.replace("-", ":")
+            if dev.address != dev.name.replace("-", ":") and len(dev.name) > 0
         ]  # if dev.details.get("props", {}).get("AddressType", "") != "random" ]
 
     devices = asyncio.run(bt_scan())
