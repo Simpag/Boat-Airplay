@@ -271,9 +271,9 @@ def _get_connected_devices() -> tuple:
     # Regular expression used to grab the mac addresses
     re_string = re.compile(r"(?:[0-9a-fA-F]:?){12} .*\n$")
 
-    # Grab all of the Paired devices
+    # Grab all of the connected devices
     ret = subprocess.run(
-        ["bluetoothctl", "devices", "Paired"],
+        ["bluetoothctl", "devices", "Connected"],
         shell=False,
         capture_output=True,
     )
