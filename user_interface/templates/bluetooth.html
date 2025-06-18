@@ -41,6 +41,14 @@
             transform: scale(1.05);
         }
 
+        .disconnect {
+            background-color: #f32121;
+        }
+
+        .disconnect:hover {
+            background-color: #d21919;
+        }
+
         ul {
             list-style: none;
             padding: 0;
@@ -127,6 +135,34 @@
                 });
         }
 
+        function getConnectedDevice() {
+            let devicesList = document.getElementById('connected-device-list');
+            devicesList.innerHTML = '';
+
+            fetch('/bluetooth/connected')
+                .then(response => response.json())
+                .then(devices => {
+                    devicesList.innerHTML = '';
+                    devices.forEach(device => {
+                        let li = document.createElement('li');
+                        li.innerHTML = `<span>${device.name}</span>`;
+                        let pairButton = document.createElement('button');
+                        pairButton.textContent = 'Disconnect';
+                        pairButton.className = "disconnect"
+                        pairButton.onclick = () => disconnectDevice();
+                        li.appendChild(pairButton);
+                        devicesList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    alert('Failed to find connected device.');
+                });
+        }
+
+        function disconnectDevice() {
+            fetch(`/bluetooth/disconnect`).finally(() => getConnectedDevice());
+        }
+
         function pairDevice(deviceAddress) {
             fetch(`/bluetooth/connect/${deviceAddress}`)
                 .then(response => response.json())
@@ -134,11 +170,13 @@
                     if (data.status === "success") {
                         alert('Device connected successfully!');
                         // scanDevices(); // Refresh list automatically after pairing
-                        window.location.href = '/';
+                        // window.location.href = '/';
                     } else {
                         alert('Device connection failed!');
                     }
-                });
+                }).finally(() => getConnectedDevice());
+
+
         }
     </script>
 </head>
@@ -148,8 +186,11 @@
     <button onclick="scanDevices()">Scan for Devices</button>
     <div id="loading-spinner" class="spinner"></div>
     <ul id="devices-list"></ul>
+    <ul id="connected-device-list"></ul>
 
     <a href="/"><button class="back-button">Back</button></a>
+
+    <script>getConnectedDevice();</script>
 </body>
 
 </html>

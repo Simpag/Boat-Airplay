@@ -3,6 +3,7 @@ from bleak import BleakScanner, BleakClient
 import subprocess
 import nmcli
 import time
+import re
 
 from flask import Flask, render_template, jsonify, request, redirect
 
@@ -132,6 +133,8 @@ def scan_bluetooth_devices():
     if DEBUG:
         print("Scanning for Bluetooth devices...")
 
+    connected_mac, _ = _get_connected_devices()
+
     async def bt_scan():
         nearby_devices = await BleakScanner.discover(timeout=8)
 
@@ -141,7 +144,9 @@ def scan_bluetooth_devices():
         return [
             {"name": dev.name, "address": dev.address}
             for dev in nearby_devices
-            if dev.address != dev.name.replace("-", ":") and len(dev.name) > 0
+            if dev.address != dev.name.replace("-", ":")
+            and len(dev.name) > 0
+            and dev.address != connected_mac
         ]  # if dev.details.get("props", {}).get("AddressType", "") != "random" ]
 
     devices = asyncio.run(bt_scan())
@@ -150,6 +155,18 @@ def scan_bluetooth_devices():
         print("Found devices:", devices)
 
     return jsonify(devices)
+
+
+@app.route("/bluetooth/connected")
+def connected_device():
+    _, name = _get_connected_devices()
+
+    return jsonify({"name": name})
+
+
+@app.route("/bluetooth/disconnect")
+def disconnect_device():
+    _disconnect_device()
 
 
 # Route to pair and trust a device
@@ -161,35 +178,33 @@ def connect_device(device_address):
         return jsonify({"status": "failed", "device": device_address})
 
 
+def _disconnect_device():
+    subprocess.run(
+        ["bluetoothctl", "disconnect"],
+        shell=False,
+        capture_output=True,
+    )
+
+
 # Function to pair and trust a device using pybluez (instead of os.system())
 def connect_to_device(device_address):
     if DEBUG:
         print(f"Attempting to connect to device: {device_address}")
 
-    async def bt_con():
-        client = BleakClient(device_address)
+    paired_macs = set(_get_paired_mac_addresses())
 
-        try:
-            await client.connect()
-        except Exception as e:
-            print(e)
+    if not device_address in paired_macs:
+        paired = _pair_device(device_address)
+        if not paired:
             return False
 
-        return True
+        time.sleep(2)
 
-    paired = asyncio.run(bt_con())
-
-    if not paired:
-        print("Failed to pair!")
-        return False
-
-    time.sleep(2)
-
-    subprocess.run(
-        ["bluetoothctl", "trust", device_address],
-        shell=False,
-        capture_output=True,
-    )
+        subprocess.run(
+            ["bluetoothctl", "trust", device_address],
+            shell=False,
+            capture_output=True,
+        )
 
     ret = subprocess.run(
         ["bluetoothctl", "connect", device_address],
@@ -208,6 +223,77 @@ def connect_to_device(device_address):
         return False
 
     return True
+
+
+def _pair_device(device_address):
+    async def bt_con():
+        client = BleakClient(device_address)
+
+        try:
+            await client.connect()
+        except Exception as e:
+            print(e)
+            return False
+
+        return True
+
+    paired = asyncio.run(bt_con())
+
+    if not paired:
+        print("Failed to pair!")
+        return False
+
+    return True
+
+
+def _get_paired_mac_addresses() -> list:
+    # Regular expression used to grab the mac addresses
+    re_string = re.compile(r"(?:[0-9a-fA-F]:?){12}")
+
+    # Grab all of the Paired devices
+    ret = subprocess.run(
+        ["bluetoothctl", "devices", "Paired"],
+        shell=False,
+        capture_output=True,
+    )
+
+    # Run the regex on the output
+    macs = ret.stdout.decode()
+    macs = re.findall(re_string, macs)
+
+    if DEBUG:
+        print("MAC addresses found: ", macs)
+
+    return macs
+
+
+def _get_connected_devices() -> tuple:
+    # Regular expression used to grab the mac addresses
+    re_string = re.compile(r"(?:[0-9a-fA-F]:?){12} .*\n$")
+
+    # Grab all of the Paired devices
+    ret = subprocess.run(
+        ["bluetoothctl", "devices", "Paired"],
+        shell=False,
+        capture_output=True,
+    )
+
+    # Run the regex on the output
+    dev = ret.stdout.decode()
+    dev = re.findall(re_string, dev)
+
+    if len(dev) == 0:
+        return "", ""
+
+    dev = dev[0].strip()
+    dev = dev.split(" ")
+    mac = dev.pop(0)
+    dev = " ".join(dev)
+
+    if DEBUG:
+        print("dev found: ", dev)
+
+    return mac, dev
 
 
 # Route to the main page (web UI)
