@@ -193,7 +193,11 @@ def setup_hotspot():
 
     print("Setting up hotspot...")
     nmcli.device.wifi_hotspot(
-        ssid="AirplayBridge", password="12345678", channel=11, con_name="RPI-Hotspot"
+        ssid="AirplayBridge",
+        password="12345678",
+        channel=11,
+        band="bg",
+        con_name="RPI-Hotspot",
     )
 
     nmcli.connection.modify(
