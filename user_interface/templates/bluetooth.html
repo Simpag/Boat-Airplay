@@ -139,6 +139,7 @@
             let devicesList = document.getElementById('connected-device-list');
             let deviceHeader = document.getElementById('connected-device-header');
             devicesList.innerHTML = '';
+            deviceHeader.innerText = '';
 
             fetch('/bluetooth/connected')
                 .then(response => response.json())

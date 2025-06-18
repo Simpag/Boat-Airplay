@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve airplay bridge ui
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/Boat-Airplay/user_interface
+ExecStart=/home/pi/Boat-Airplay/user_interface/venv/bin/gunicorn -w 1 -b 0.0.0.0:5001 app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

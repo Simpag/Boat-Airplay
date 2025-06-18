@@ -29,3 +29,15 @@ Setup hotspot to be active if no other networks are available:
 ```
 python setup_hotspot.py
 ```
+
+### Auto-run
+Copy `airplay-bridge-ui.service` to `/etc/systemd/system/`.
+
+``
+sudo cp airplay-bridge-ui.service /etc/systemd/system/
+``
+
+To enable the service, run the following: 
+
+* `sudo systemctl start airplay-bridge-ui.service` to run the script now.
+* `sudo systemctl enable airplay-bridge-ui.service` to set the script to run every boot.
