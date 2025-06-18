@@ -137,13 +137,16 @@
 
         function getConnectedDevice() {
             let devicesList = document.getElementById('connected-device-list');
+            let deviceHeader = document.getElementById('connected-device-header');
             devicesList.innerHTML = '';
 
             fetch('/bluetooth/connected')
                 .then(response => response.json())
                 .then(devices => {
                     devicesList.innerHTML = '';
+                    deviceHeader.innerText = '';
                     devices.forEach(device => {
+                        deviceHeader.innerText = 'Connected Device:';
                         let li = document.createElement('li');
                         li.innerHTML = `<span>${device.name}</span>`;
                         let pairButton = document.createElement('button');
@@ -187,6 +190,7 @@
     <button onclick="scanDevices()">Scan for Devices</button>
     <div id="loading-spinner" class="spinner"></div>
     <ul id="devices-list"></ul>
+    <h2 id="connected-device-header"></h2>
     <ul id="connected-device-list"></ul>
 
     <a href="/"><button class="back-button">Back</button></a>
