@@ -169,7 +169,9 @@ def connected_device():
 
 @app.route("/bluetooth/disconnect")
 def disconnect_device():
-    _disconnect_device()
+    success = _disconnect_device()
+
+    return jsonify({"status": success})
 
 
 # Route to pair and trust a device
@@ -182,11 +184,13 @@ def connect_device(device_address):
 
 
 def _disconnect_device():
-    subprocess.run(
+    ret = subprocess.run(
         ["bluetoothctl", "disconnect"],
         shell=False,
         capture_output=True,
     )
+
+    return "Successful disconnected" in ret.stdout.decode()
 
 
 # Function to pair and trust a device using pybluez (instead of os.system())

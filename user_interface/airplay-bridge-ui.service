@@ -6,7 +6,7 @@ After=network.target
 User=pi
 Group=pi
 WorkingDirectory=/home/pi/Boat-Airplay/user_interface
-ExecStart=/home/pi/Boat-Airplay/user_interface/venv/bin/gunicorn -w 1 -b 0.0.0.0:5001 app:app
+ExecStart=/home/pi/Boat-Airplay/user_interface/venv/bin/gunicorn -w 2 -b 0.0.0.0:5001 app:app
 Restart=always
 
 [Install]

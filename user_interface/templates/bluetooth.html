@@ -164,7 +164,15 @@
         }
 
         function disconnectDevice() {
-            fetch(`/bluetooth/disconnect`).finally(() => getConnectedDevice());
+            fetch(`/bluetooth/disconnect`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        alert('Device connected successfully!');
+                    } else {
+                        alert('Device connection failed!');
+                    }
+                }).finally(() => getConnectedDevice());
         }
 
         function pairDevice(deviceAddress) {
