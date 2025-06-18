@@ -211,6 +211,8 @@ def setup_hotspot():
         },
     )
 
+    nmcli.connection.down("RPI-Hotspot")  # Apply new settings
+
 
 if __name__ == "__main__":
     # Start the connection loop in a background thread
