@@ -23,7 +23,13 @@ port=0
 no-resolv
 ```
 
-Install all required python packages ``pip install -r requirements.txt``.
+Create a python virtual env and install all required python packages:
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+deactivate
+```
 
 Setup hotspot to be active if no other networks are available:
 ```

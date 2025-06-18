@@ -23,7 +23,9 @@ Install build tools
 sudo apt install --no-install-recommends build-essential git xmltoman autoconf automake libtool libpopt-dev libconfig-dev libasound2-dev avahi-daemon libavahi-client-dev libssl-dev libsoxr-dev libplist-dev libsodium-dev libavutil-dev libavcodec-dev libavformat-dev uuid-dev libgcrypt-dev xxd bc
 ```
 
-Install kernel headers
+### Installing drivers for usb wifi adapter (Skip this if using onboard Wi-Fi)
+
+Install kernel headers 
 ```
 sudo apt install raspberrypi-kernel-headers
 ```
@@ -44,60 +46,65 @@ Disable built in wifi by adding to ``/boot/firmware/config.txt``
 echo 'dtoverlay=pi3-disable-wifi' | sudo tee -a /boot/firmware/config.txt
 ```
 
-Follow [shairport-sync tutorial](https://github.com/mikebrady/shairport-sync/blob/master/CAR%20INSTALL.md) to install shairport-sync airplay 2 and wifi hotspot
-
-Make rc.local executable by adding ``sudo chmod +x /etc/rc.local``. Set the alsamixer output to 0db gain by adding `amixer set 'PCM',0 0db unmute` to the rc.local script.
-
-Example hostapd config 
-```
-# Thanks to https://wiki.gentoo.org/wiki/Hostapd#802.11b.2Fg.2Fn_triple_AP
-
-# The interface used by the AP
-interface=wlan0
-
-# This is the name of the network -- yours may be different
-ssid=Ohana
-
-# 1=wpa, 2=wep, 3=both
-auth_algs=1
-
-# WPA2 only
-wpa=2
-wpa_key_mgmt=WPA-PSK
-rsn_pairwise=CCMP
-wpa_passphrase=somepassword
-
-# "g" simply means 2.4GHz band
-hw_mode=g
-
-# Channel to use
-channel=11
-
-# Limit the frequencies used to those allowed in the country
-ieee80211d=1
-
-# The country code
-country_code=SE
-
-# Enable 802.11n support
-ieee80211n=1
-
-# QoS support, also required for full speed on 802.11n/ac/ax
-wmm_enabled=1
+### Installing shairport-sync
+Skip this section if you are building classic Shairport Sync – NQPTP is not needed for classic Shairport Sync.
 
 ```
+git clone https://github.com/mikebrady/nqptp.git
+cd nqptp
+autoreconf -fi
+./configure --with-systemd-startup
+make
+sudo make install
+sudo systemctl enable nqptp
+sudo systemctl start nqptp
+cd ..
+```
 
-## Bluetooth audio
+
+Download Shairport Sync, configure, compile and install it. Omit the --with-airplay-2 from the ./configure options if you are building classic Shairport Sync.
+
+```
+git clone https://github.com/mikebrady/shairport-sync.git
+cd shairport-sync
+autoreconf -fi
+./configure --sysconfdir=/etc --with-alsa --with-soxr --with-avahi --with-ssl=openssl --with-systemd --with-airplay-2
+make
+sudo make install
+sudo systemctl enable shairport-sync
+cd ..
+```
+
+### Bluetooth audio
+You must install bluez-alsa in order to pass the audio from shairport-sync to a bluetooth speaker.
 ```
 sudo apt-get install bluez-alsa-utils
 ```
 
-Change output device to ``bluealsa`` in ``/etc/shairport-sync.conf`` and increase desired buffer length to 0.4 seconds to prevent studders. 
+### Configure Shairport-Sync
 
-## Finishing
+Change output device to ``bluealsa`` in ``/etc/shairport-sync.conf`` under alsa config and increase `audio_backend_buffer_desired_length_in_seconds` to 0.5 seconds to prevent studders. If you wish set a `volume_max_db` if your speakers distort at high volumes. If the volume range is too large uncomment `volume_range_db`.
+
+### Optional services
+Disabling these service is optional but might reduce load on your raspberry pi:
+```
+sudo systemctl disable dphys-swapfile
+sudo systemctl disable triggerhappy
+sudo systemctl disable keyboard-setup
+```
+
+### Setting up the user interface
+Follow the instructions given in `user_interface/README.md` to setup a webpage which allows you to add/remove networks and connect to bluetooth devices. This will also setup a hotspot which will be launched if no other networks are available. 
+
+If you do not wish to use this, a simple bluetooth auto-connector script is available under `simple_bluetooth_connector/README.md`. This script will automatically try to connect to a paired bluetooth device every 5 seconds. Therefore you must manually pair and trust devices using `bluetoothctl`.
+
+### Finishing
 This optional step is applicable to a Raspberry Pi only. Run sudo raspi-config and then choose Performance Options > Overlay Filesystem and choose to enable the overlay filesystem, and to set the boot partition to be write-protected. (The idea here is that this offers more protection against files being corrupted by the sudden removal of power.)
 
 If you want to shairport-sync to automatically restart on failure, see [here](https://ma.ttias.be/auto-restart-crashed-service-systemd/).
+
+## Credits
+Much inspiration is taken from [this](https://github.com/mikebrady/shairport-sync/blob/master/CAR%20INSTALL.md) tutorial on the shairport-sync github.
 
 ### Notes
 https://unix.stackexchange.com/questions/334386/how-to-set-up-automatic-connection-of-bluetooth-headset
