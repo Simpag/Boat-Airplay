@@ -2,6 +2,7 @@ import asyncio
 from bleak import BleakScanner, BleakClient
 import subprocess
 import nmcli
+import time
 
 from flask import Flask, render_template, jsonify, request, redirect
 
@@ -181,6 +182,14 @@ def connect_to_device(device_address):
     if not paired:
         print("Failed to pair!")
         return False
+
+    time.sleep(2)
+
+    subprocess.run(
+        ["bluetoothctl", "trust", device_address],
+        shell=False,
+        capture_output=True,
+    )
 
     ret = subprocess.run(
         ["bluetoothctl", "connect", device_address],
