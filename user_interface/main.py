@@ -169,6 +169,7 @@ def connect_to_device(device_address):
         client = BleakClient(device_address)
 
         try:
+            await client.pair()
             await client.connect()
         except Exception as e:
             print(e)
