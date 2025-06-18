@@ -225,6 +225,9 @@ def connect_to_device(device_address):
             )
         return False
 
+    if DEBUG:
+        print("Device connected successfully!")
+
     return True
 
 
@@ -234,6 +237,8 @@ def _pair_device(device_address):
 
         try:
             await client.connect()
+            if DEBUG:
+                print(f"Device {device_address} paired!")
         except Exception as e:
             print(e)
             return False
@@ -294,7 +299,7 @@ def _get_connected_devices() -> tuple:
     dev = " ".join(dev)
 
     if DEBUG:
-        print("dev found: ", dev)
+        print("Connection found: ", dev)
 
     return mac, dev
 
