@@ -195,7 +195,6 @@ def setup_hotspot():
     nmcli.device.wifi_hotspot(
         ssid="AirplayBridge",
         password="12345678",
-        channel=11,
         band="bg",
         con_name="RPI-Hotspot",
     )
@@ -208,7 +207,7 @@ def setup_hotspot():
             "ipv4.gateway": '""',
             "ipv4.dns": '""',
             "connection.autoconnect": "yes",
-            "connection.autoconnect-priority": -1,
+            "connection.autoconnect-priority": "-1",
         },
     )
 
