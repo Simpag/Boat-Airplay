@@ -35,7 +35,7 @@ def setup_hotspot(password):
 if __name__ == "__main__":
     ans1 = 1
     ans2 = 2
-    while ans1 != ans2:
+    while ans1 != ans2 and len(ans1) < 8:
         ans1 = input("Password: ")
         ans2 = input("Confirm password: ")
 

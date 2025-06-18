@@ -101,7 +101,7 @@ If you do not wish to use this, a simple bluetooth auto-connector script is avai
 ### Finishing
 This optional step is applicable to a Raspberry Pi only. Run sudo raspi-config and then choose Performance Options > Overlay Filesystem and choose to enable the overlay filesystem, and to set the boot partition to be write-protected. (The idea here is that this offers more protection against files being corrupted by the sudden removal of power.)
 
-If you want to shairport-sync to automatically restart on failure, see [here](https://ma.ttias.be/auto-restart-crashed-service-systemd/).
+If you want to shairport-sync to automatically restart on failure, see [here](https://ma.ttias.be/auto-restart-crashed-service-systemd/) and edit the shairport-sync service located at `/lib/systemd/system/shairport-sync.service`.
 
 ## Credits
 Much inspiration is taken from [this](https://github.com/mikebrady/shairport-sync/blob/master/CAR%20INSTALL.md) tutorial on the shairport-sync github.

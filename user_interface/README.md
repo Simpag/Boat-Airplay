@@ -16,7 +16,6 @@ sudo apt-get install dnsmasq
 
 Edit the config for dnsmasq ``/etc/dnsmasq.conf``:
 ```
-interface=wlan0
 bind-interfaces
 dhcp-range=10.0.10.10,10.0.10.150,12h
 port=0
