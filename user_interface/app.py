@@ -198,6 +198,10 @@ def connect_to_device(device_address):
     if DEBUG:
         print(f"Attempting to connect to device: {device_address}")
 
+    if _is_connected():
+        _disconnect_device()
+        print("Currently connected, disconnecting device")
+
     paired_macs = set(_get_paired_mac_addresses())
 
     if not device_address in paired_macs:
@@ -205,7 +209,7 @@ def connect_to_device(device_address):
         if not paired:
             return False
 
-        time.sleep(2)
+        time.sleep(3)
 
         subprocess.run(
             ["bluetoothctl", "trust", device_address],
@@ -306,6 +310,17 @@ def _get_connected_devices() -> tuple:
         print("Connection found: ", dev)
 
     return mac, dev
+
+
+def _is_connected():
+    # Check if we are connected
+    ret = subprocess.run(
+        ["bluetoothctl", "devices", "Connected"],
+        shell=False,
+        capture_output=True,
+    )
+    connected = len(ret.stdout) > 0
+    return connected
 
 
 # Route to the main page (web UI)
