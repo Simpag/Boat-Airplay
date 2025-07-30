@@ -35,6 +35,13 @@ Setup hotspot to be active if no other networks are available:
 python setup_hotspot.py
 ```
 
+### Troubleshooting
+You might need to add your user to the bluetooth and lp group by running:
+```
+sudo adduser pi lp
+sudo adduser pi bluetooth
+```
+
 ### Auto-run
 Copy `airplay-bridge-ui.service` to `/etc/systemd/system/`.
 

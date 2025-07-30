@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 # Constants
 DEBUG = True
+BLUETOOTH_SCAN_DURATION = 15  # Duration for Bluetooth scan in seconds
 
 
 # ----------- WiFi Management ------------
@@ -153,7 +154,7 @@ def scan_bluetooth_devices():
     devices = asyncio.run(bt_scan())"""
 
     subprocess.run(
-        ["bluetoothctl", "--timeout", "15", "scan", "on"],
+        ["bluetoothctl", "--timeout", str(BLUETOOTH_SCAN_DURATION), "scan", "on"],
         shell=False,
         capture_output=True,
     )
