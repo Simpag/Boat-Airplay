@@ -152,22 +152,47 @@ def scan_bluetooth_devices():
 
     devices = asyncio.run(bt_scan())"""
 
-    subprocess.run(["bluetoothctl", "--timeout", "8", "scan", "on"], shell=False, capture_output=True)
+    subprocess.run(
+        ["bluetoothctl", "--timeout", "8", "scan", "on"],
+        shell=False,
+        capture_output=True,
+    )
     ret = subprocess.run(
         ["bluetoothctl", "devices"],
         shell=False,
         capture_output=True,
     )
     nearby_devices = ret.stdout.decode().strip().split("\n")
-    devices = [
-        {"name": dev.split(" ")[-1], "address": dev.split(" ")[-2]}
-        for dev in nearby_devices
-        if dev
-        and len(dev.split(" ")) > 2
-        and dev.split(" ")[-2] != dev.split(" ")[-1].replace("-", ":")
-        and len(dev.split(" ")[-1]) > 0
-        and dev.split(" ")[-2] != connected_mac
-    ]
+
+    devices = []
+    for dev_line in nearby_devices:
+        if not dev_line or not dev_line.startswith("Device "):
+            continue
+
+        # Parse the device line: "Device MAC_ADDRESS DEVICE_NAME"
+        # Remove "Device " prefix and split by space
+        dev_info = dev_line[7:]  # Remove "Device " prefix
+        parts = dev_info.split(" ", 1)  # Split into max 2 parts: MAC and name
+
+        if len(parts) < 2:
+            continue
+
+        address = parts[0]
+        name = parts[1]
+
+        # Skip if address equals name (no actual device name)
+        if address == name or address == name.replace("-", ":"):
+            continue
+
+        # Skip if already connected to this device
+        if address == connected_mac:
+            continue
+
+        # Skip if name is empty or just the MAC address format
+        if len(name.strip()) == 0:
+            continue
+
+        devices.append({"name": name, "address": address})
 
     if DEBUG:
         print("All devices: ", nearby_devices)
