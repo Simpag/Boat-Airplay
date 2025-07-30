@@ -1,5 +1,4 @@
 import asyncio
-from bleak import BleakScanner, BleakClient
 import subprocess
 import nmcli
 import time
@@ -135,7 +134,7 @@ def scan_bluetooth_devices():
 
     connected_mac, _ = _get_connected_devices()
 
-    async def bt_scan():
+    """async def bt_scan():
         nearby_devices = await BleakScanner.discover(timeout=8)
 
         if DEBUG:
@@ -151,9 +150,29 @@ def scan_bluetooth_devices():
             and dev.address != connected_mac
         ]  # if dev.details.get("props", {}).get("AddressType", "") != "random" ]
 
-    devices = asyncio.run(bt_scan())
+    devices = asyncio.run(bt_scan())"""
+
+    subprocess.run(["bluetoothctl", "scan", "on"], shell=False)
+    time.sleep(8)  # Wait for scan to complete
+    subprocess.run(["bluetoothctl", "scan", "off"], shell=False)
+    ret = subprocess.run(
+        ["bluetoothctl", "devices"],
+        shell=False,
+        capture_output=True,
+    )
+    nearby_devices = ret.stdout.decode().strip().split("\n")
+    devices = [
+        {"name": dev.split(" ")[-1], "address": dev.split(" ")[-2]}
+        for dev in nearby_devices
+        if dev
+        and len(dev.split(" ")) > 2
+        and dev.split(" ")[-2] != dev.split(" ")[-1].replace("-", ":")
+        and len(dev.split(" ")[-1]) > 0
+        and dev.split(" ")[-2] != connected_mac
+    ]
 
     if DEBUG:
+        print("All devices: ", nearby_devices)
         print("Found devices:", devices)
 
     return jsonify(devices)
@@ -284,7 +303,7 @@ def _pair_device(device_address):
 
     if not paired:
         print("Failed to pair!")
-        return False, device_address
+        return False, None
 
     return True, paired_to[0] if paired_to else device_address
 
