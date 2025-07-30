@@ -144,7 +144,8 @@ def scan_bluetooth_devices():
         return [
             {"name": dev.name, "address": dev.address}
             for dev in nearby_devices
-            if dev.address != dev.name.replace("-", ":")
+            if dev and dev.name and
+            dev.address != dev.name.replace("-", ":")
             and len(dev.name) > 0
             and dev.address != connected_mac
         ]  # if dev.details.get("props", {}).get("AddressType", "") != "random" ]
