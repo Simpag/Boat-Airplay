@@ -153,7 +153,7 @@ def scan_bluetooth_devices():
     devices = asyncio.run(bt_scan())"""
 
     subprocess.run(
-        ["bluetoothctl", "--timeout", "8", "scan", "on"],
+        ["bluetoothctl", "--timeout", "15", "scan", "on"],
         shell=False,
         capture_output=True,
     )
