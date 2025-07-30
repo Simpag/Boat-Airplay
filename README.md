@@ -85,6 +85,16 @@ sudo apt-get install bluez-alsa-utils
 
 Change output device to ``bluealsa`` in ``/etc/shairport-sync.conf`` under alsa config, set `interpolation` to `basic` and increase `audio_backend_buffer_desired_length_in_seconds` to 0.75 seconds under general and finally set `buffer_size` to 44100 and `output_format` to S16_LE under alsa config in order to prevent studders. If you wish set a `volume_max_db` if your speakers distort at high volumes. If the volume range is too large uncomment `volume_range_db`.
 
+### Configure powersave on wifi adapter
+Edit `/etc/rc.local`
+```
+#!/bin/sh -e
+
+/bin/sleep 2 # may be necessary while wlan0 becomes available
+/sbin/iw dev wlan0 set power_save off
+```
+Make sure that rc.local is executable by running `sudo chmod +x /etc/rc.local`
+
 ### Optional services
 Disabling these service is optional but might reduce load on your raspberry pi:
 ```
