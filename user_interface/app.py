@@ -144,8 +144,9 @@ def scan_bluetooth_devices():
         return [
             {"name": dev.name, "address": dev.address}
             for dev in nearby_devices
-            if dev and dev.name and
-            dev.address != dev.name.replace("-", ":")
+            if dev
+            and dev.name
+            and dev.address != dev.name.replace("-", ":")
             and len(dev.name) > 0
             and dev.address != connected_mac
         ]  # if dev.details.get("props", {}).get("AddressType", "") != "random" ]
@@ -206,9 +207,19 @@ def connect_to_device(device_address):
     paired_macs = set(_get_paired_mac_addresses())
 
     if not device_address in paired_macs:
-        paired = _pair_device(device_address)
+        paired, paired_to = _pair_device(device_address)
         if not paired:
             return False
+
+        # Check if we tried to connect to some LE
+        # devices and it changed address
+        if paired_to != device_address:
+            if DEBUG:
+                print(
+                    "Device address changed during pairing, trying to connect to new address: ",
+                    paired_to,
+                )
+            device_address = paired_to
 
         time.sleep(3)
 
@@ -217,6 +228,8 @@ def connect_to_device(device_address):
             shell=False,
             capture_output=True,
         )
+
+        time.sleep(3)
 
     ret = subprocess.run(
         ["bluetoothctl", "connect", device_address],
@@ -241,7 +254,7 @@ def connect_to_device(device_address):
 
 
 def _pair_device(device_address):
-    async def bt_con():
+    """async def bt_con():
         client = BleakClient(device_address)
 
         try:
@@ -254,13 +267,26 @@ def _pair_device(device_address):
 
         return True
 
-    paired = asyncio.run(bt_con())
+    paired = asyncio.run(bt_con())"""
+
+    ret = subprocess.run(
+        ["bluetoothctl", "pair", device_address],
+        shell=False,
+        capture_output=True,
+    )
+
+    stdout = ret.stdout.decode()
+    paired = "Pairing successful" in stdout
+    # Find the device address corresponding the the paired device
+    # Output looks like:
+    # "Device XX:XX:XX:XX:XX:XX Paired: yes"
+    paired_to = re.findall(r"Device (.*) Paired: yes", stdout)
 
     if not paired:
         print("Failed to pair!")
-        return False
+        return False, device_address
 
-    return True
+    return True, paired_to[0] if paired_to else device_address
 
 
 def _get_paired_mac_addresses() -> list:
