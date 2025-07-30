@@ -5,7 +5,7 @@
 * TP-Link TL-WN722N
 
 ## Installation
-Install raspberry pi os lite 64 bit for raspberry pi zero 2W.
+Install raspberry pi os lite 32 bit for raspberry pi zero 2W due to less overhead compared to 64 bit version, 64 bit might cause studders.
 
 ```
 sudo apt-get update
