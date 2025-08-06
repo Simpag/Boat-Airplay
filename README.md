@@ -83,7 +83,33 @@ sudo apt-get install bluez-alsa-utils
 
 ### Configure Shairport-Sync
 
-Change output device to ``bluealsa`` in ``/etc/shairport-sync.conf`` under alsa config, set `interpolation` to `basic` and increase `audio_backend_buffer_desired_length_in_seconds` to 0.75 seconds under general and finally set `buffer_size` to 19845 and `output_format` to S16_LE under alsa config in order to prevent studders. If you wish set a `volume_max_db` if your speakers distort at high volumes. If the volume range is too large uncomment `volume_range_db`.
+Change output device to ``bluealsa`` in ``/etc/shairport-sync.conf`` under alsa config, set `interpolation` to `basic` and increase `audio_backend_buffer_desired_length_in_seconds` to 0.75 seconds under general and finally set `buffer_size` to 19845 and `output_format` to S16_LE under alsa config in order to prevent studders. If you wish set a `volume_max_db` if your speakers distort at high volumes. If the volume range is too large uncomment `volume_range_db`. Following is an example config:
+
+```
+// General Settings
+general =
+{
+	name = "AirplayBridge"; // This means "Hostname" -- see below. This is the name the service will advertise to iTunes.
+	interpolation = "basic"; 
+	output_backend = "alsa"; 
+
+	volume_range_db = 60 ; 
+	volume_max_db = -0.2 ; 
+
+	audio_backend_buffer_desired_length_in_seconds = 0.75; // If set too small, buffer underflow occurs on low-powered machines.
+};
+
+alsa =
+{
+	output_device = "bluealsa";
+
+	output_rate = 44100;
+	output_format = "S16_LE"; 
+
+	buffer_size = 19845; // Use this optional advanced setting to set the alsa buffer size near to this value
+};
+```
+
 
 ### Configure powersave on wifi adapter
 Edit `/etc/rc.local`
