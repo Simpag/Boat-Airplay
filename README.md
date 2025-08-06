@@ -143,6 +143,3 @@ If you want to shairport-sync to automatically restart on failure, see [here](ht
 
 ## Credits
 Much inspiration is taken from [this](https://github.com/mikebrady/shairport-sync/blob/master/CAR%20INSTALL.md) tutorial on the shairport-sync github.
-
-### Notes
-https://unix.stackexchange.com/questions/334386/how-to-set-up-automatic-connection-of-bluetooth-headset
